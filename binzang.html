@@ -114,7 +114,9 @@
         }
 
         // 尸体检验台使用费
-        if(document.getElementById("inspectionFee").checked) {
+        let bodyExaminationTable = document.getElementById('bodyExaminationTable');
+        if(bodyExaminationTable.value && Number(bodyExaminationTable.value) > 0) {
+            let bodyExaminationFee = 400 * Number(bodyExaminationTable.value); 
             total += 400;
             recordServiceTotal += 400;
         }
