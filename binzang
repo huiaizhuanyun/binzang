@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汇爱殡葬服务费用计算</title>
+</head>
+<body>
+
+<h2>服务费用计算</h2>
+
+<h3>太平间费用（物价局备案）</h3>
+<label for="days">停保天数（550/天）:</label>
+<input type="number" id="days" onchange="calculateTotal()"><br>
+
+<input type="checkbox" id="sanitation" onchange="calculateTotal()"> 卫生费 (100元/次)<br>
+<input type="checkbox" id="disinfect" onchange="calculateTotal()"> 消毒费 (100元/次)<br>
+<input type="checkbox" id="carryCorpse" onchange="calculateTotal()"> 抬尸费 (400元/次)<br>
+<input type="checkbox" id="bodyBag" onchange="calculateTotal()"> 尸体袋 (260元/次)<br>
+<input type="checkbox" id="inspectionFee" onchange="calculateTotal()"> 尸体检验台使用费 (400元/次)<br>
+<input type="checkbox" id="corpseTransport" onchange="calculateTotal()"> 现场运尸费 (600元/次)<br>
+<input type="checkbox" id="prepFee" onchange="calculateTotal()"> 料理费 (400元/次)<br>
+
+<!-- 在备案服务项目下面添加一个总费用显示 -->
+<p id="recordTotal">备案服务项目总费用: 0</p>
+
+<h3>汇爱服务项目</h3>
+
+<h4>擦洗穿衣</h4>
+<!-- 在擦洗穿衣部分增加“不使用”选项 -->
+<input type="radio" name="washAndDress" value="0" onchange="calculateTotal()" checked> 不使用<br>
+<input type="radio" name="washAndDress" value="800" onchange="calculateTotal()"> 800元 (1位师傅)<br>
+<input type="radio" name="washAndDress" value="1500" onchange="calculateTotal()"> 1500元 (3位师傅)<br>
+
+<!-- 洗发、理发、刮胡子费用 -->
+<input type="checkbox" id="haircare" onchange="calculateTotal()"> 洗发、理发、刮胡子 (200元/次)<br>
+
+<!-- 化妆费用 -->
+<input type="checkbox" id="makeup" onchange="calculateTotal()"> 化妆 (600元/次)<br>
+
+<!-- 太空被费用 -->
+<input type="checkbox" id="spaceBlanket" onchange="calculateTotal()"> 太空被 (200元/套)<br>
+
+<!-- 白布毛巾费用 -->
+<input type="checkbox" id="whiteTowel" onchange="calculateTotal()"> 白布毛巾 (100元)<br>
+
+<!-- CT预约、抬尸、会诊费用 -->
+<input type="checkbox" id="ctAppointment" onchange="calculateTotal()"> CT预约、抬尸、会诊 (500元/次)<br>
+<h4>特种车辆运送费</h4>
+<input type="radio" name="specialTransport" value="0" onchange="calculateTotal()" checked> 不使用<br>
+<input type="radio" name="specialTransport" value="600" onchange="calculateTotal()"> 600元 (10KM内)<br>
+<input type="radio" name="specialTransport" value="800" onchange="calculateTotal()"> 800元 (20KM内)<br>
+<input type="radio" name="specialTransport" value="1000" onchange="calculateTotal()"> 1000元 (30KM内)<br>
+
+<label for="stitching">缝合费用:</label>
+<input type="number" id="stitching" onchange="calculateTotal()"><br>
+
+<p id="loveTotal">汇爱服务项目总费用: 0</p>
+
+<h3>总费用:</h3>
+<p id="total">0</p>
+
+<button onclick="clearAll()">清除所有选项</button>
+
+<button onclick="generateSummary()">生成服务总结表</button>
+
+<h3>选定的服务及金额</h3>
+<table border="1" id="summaryTable">
+    <thead>
+        <tr>
+            <th>服务名称</th>
+            <th>金额</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- 动态添加内容将会放在这里 -->
+    </tbody>
+</table>
+
+<script>
+     function calculateTotal() {
+        let total = 0;
+        let recordServiceTotal = 0; // 备案服务项目总费用
+        let loveServiceTotal = 0;  // 汇爱服务项目总费用
+
+        // 使用parseFloat确保得到的是数值
+        let days = parseFloat(document.getElementById("days").value);
+        if (isNaN(days)) days = 0;  // 如果不是数字，则设置为0
+        total += days * 550;
+        recordServiceTotal += days * 550;
+        // 卫生费
+        if(document.getElementById("sanitation").checked) {
+            total += 100;
+            recordServiceTotal += 100;
+        }
+        
+        // 消毒费
+        if(document.getElementById("disinfect").checked) {
+            total += 100;
+            recordServiceTotal += 100;
+        }
+        
+        // 抬尸费
+        if(document.getElementById("carryCorpse").checked) {
+            total += 400;
+            recordServiceTotal += 400;
+        }
+        
+        // 尸体袋
+        if(document.getElementById("bodyBag").checked) {
+            total += 260;
+            recordServiceTotal += 260;
+        }
+
+        // 尸体检验台使用费
+        if(document.getElementById("inspectionFee").checked) {
+            total += 400;
+            recordServiceTotal += 400;
+        }
+
+        // 现场运尸费
+        if(document.getElementById("corpseTransport").checked) {
+            total += 600;
+            recordServiceTotal += 600;
+        }
+
+        // 料理费
+        if(document.getElementById("prepFee").checked) {
+            total += 400;
+            recordServiceTotal += 400;
+        }
+
+        // 擦洗穿衣费
+        let washAndDress = document.querySelector('input[name="washAndDress"]:checked');
+        if(washAndDress) {
+            total += parseFloat(washAndDress.value);
+            loveServiceTotal += parseFloat(washAndDress.value);
+
+        }
+        // 在 calculateTotal 函数中加入以下代码以计算上述费用：
+
+        // 洗发、理发、刮胡子费
+        if(document.getElementById("haircare").checked) {
+            total += 200;
+            loveServiceTotal += 200;
+        }
+
+        // 化妆费
+        if(document.getElementById("makeup").checked) {
+        total += 600;
+        loveServiceTotal += 600;
+        }
+
+        // 特种车辆运送费
+        let specialTransport = document.querySelector('input[name="specialTransport"]:checked');
+        if(specialTransport) {
+        total += parseFloat(specialTransport.value);
+        loveServiceTotal += parseFloat(specialTransport.value);
+        }
+
+        // 缝合费用
+        let stitchingFee = parseFloat(document.getElementById("stitching").value);
+if (isNaN(stitchingFee)) stitchingFee = 0;  // 如果不是数字，则设置为0
+        if(stitchingFee) {
+            total += parseFloat(stitchingFee);
+            loveServiceTotal += parseFloat(stitchingFee);
+        }
+
+         // 太空被费用
+         if(document.getElementById("spaceBlanket").checked) {
+             total += 200;
+             loveServiceTotal += 200;
+        }
+
+         // 白布毛巾费用
+         if(document.getElementById("whiteTowel").checked) {
+             total += 100;
+             loveServiceTotal += 100;
+         }
+
+         // CT预约、抬尸、会诊费用
+         if(document.getElementById("ctAppointment").checked) {
+             total += 500;
+             loveServiceTotal += 500;
+         }
+
+         // 更新显示的备案服务项目总费用
+         document.getElementById("recordTotal").innerText = "备案服务项目总费用: " + recordServiceTotal + "元";
+    
+         // 更新显示的汇爱服务项目总费用
+         document.getElementById("loveTotal").innerText = "汇爱服务项目总费用: " + loveServiceTotal + "元";
+
+         // 更新显示的总费用
+         document.getElementById("total").innerText = total + '元';
+}
+         function clearAll() {
+         // 清除文本和数字输入
+         document.getElementById("days").value = '';
+         document.getElementById("stitching").value = '';
+
+         // 清除复选框
+          let checkboxes = document.querySelectorAll('input[type="checkbox"]');   
+         checkboxes.forEach(checkbox => {
+         checkbox.checked = false;
+    });
+
+         // 清除单选按钮
+         let radioButtons = document.querySelectorAll('input[type="radio"]');
+         radioButtons.forEach(radio => {
+             radio.checked = false;
+    });
+
+         // 重新计算费用
+         calculateTotal();
+}
+
+         function generateSummary() {
+         let tableBody = document.querySelector("#summaryTable tbody");
+    
+         // 首先清空当前内容
+         tableBody.innerHTML = "";
+
+         // 为每个选择的服务和金额创建一行
+         // 例如，停保天数
+         let days = document.getElementById("days").value;
+         if(days && days != 0) {
+            let row = tableBody.insertRow();
+            row.insertCell(0).innerHTML = "停保天数";
+            row.insertCell(1).innerHTML = days * 550 + "元";
+    }
+
+         // 对于其他已选择的服务，执行类似操作，例如：
+         if(document.getElementById("sanitation").checked) {
+             let row = tableBody.insertRow();
+            row.insertCell(0).innerHTML = "卫生费";
+            row.insertCell(1).innerHTML = "100元";
+    }
+
+          // 消毒费
+         if(document.getElementById("disinfect").checked) {
+             let row = tableBody.insertRow();
+             row.insertCell(0).innerHTML = "消毒费";
+             row.insertCell(1).innerHTML = "100元";
+}
+
+          // 抬尸费
+         if(document.getElementById("carryCorpse").checked) {
+             let row = tableBody.insertRow();
+             row.insertCell(0).innerHTML = "抬尸费";
+             row.insertCell(1).innerHTML = "400元";
+}
+
+          // 尸体袋
+         if(document.getElementById("bodyBag").checked) {
+             let row = tableBody.insertRow();
+             row.insertCell(0).innerHTML = "尸体袋";
+             row.insertCell(1).innerHTML = "260元";
+}
+
+// 尸体检验台使用费
+         if(document.getElementById("inspectionFee").checked) {
+             let row = tableBody.insertRow();
+             row.insertCell(0).innerHTML = "尸体检验台使用费";
+             row.insertCell(1).innerHTML = "400元";
+}
+
+// 现场运尸费
+         if(document.getElementById("corpseTransport").checked) {
+             let row = tableBody.insertRow();
+             row.insertCell(0).innerHTML = "现场运尸费";
+             row.insertCell(1).innerHTML = "600元";
+}
+
+// 料理费
+         if(document.getElementById("prepFee").checked) {
+             let row = tableBody.insertRow();
+             row.insertCell(0).innerHTML = "料理费";
+             row.insertCell(1).innerHTML = "400元";
+}
+
+
+// ... 对于汇爱服务项目的费用也执行类似操作 ...
+// 例如，洗发、理发、刮胡子费用
+if(document.getElementById("haircare").checked) {
+    let row = tableBody.insertRow();
+    row.insertCell(0).innerHTML = "洗发、理发、刮胡子";
+    row.insertCell(1).innerHTML = "200元";
+}
+
+// 擦洗穿衣费
+let washAndDress = document.querySelector('input[name="washAndDress"]:checked');
+if(washAndDress && parseFloat(washAndDress.value) !== 0) {
+    let row = tableBody.insertRow();
+    row.insertCell(0).innerHTML = "擦洗穿衣";
+    row.insertCell(1).innerHTML = parseFloat(washAndDress.value) + "元";
+}
+
+// 化妆费
+if(document.getElementById("makeup").checked) {
+    let row = tableBody.insertRow();
+    row.insertCell(0).innerHTML = "化妆";
+    row.insertCell(1).innerHTML = "600元";
+}
+
+// 太空被费用
+if(document.getElementById("spaceBlanket").checked) {
+    let row = tableBody.insertRow();
+    row.insertCell(0).innerHTML = "太空被";
+    row.insertCell(1).innerHTML = "200元";
+}
+
+// 白布毛巾费用
+if(document.getElementById("whiteTowel").checked) {
+    let row = tableBody.insertRow();
+    row.insertCell(0).innerHTML = "白布毛巾";
+    row.insertCell(1).innerHTML = "100元";
+}
+
+// CT预约、抬尸、会诊费用
+if(document.getElementById("ctAppointment").checked) {
+    let row = tableBody.insertRow();
+    row.insertCell(0).innerHTML = "CT预约、抬尸、会诊";
+    row.insertCell(1).innerHTML = "500元";
+}
+
+// 特种车辆运送费
+let specialTransport = document.querySelector('input[name="specialTransport"]:checked');
+if(specialTransport && specialTransport.value !== "0") {
+    let transportFee;
+    switch(specialTransport.value) {
+        case '600':
+            transportFee = "600元 (10KM内)";
+            break;
+        case '800':
+            transportFee = "800元 (20KM内)";
+            break;
+        case '1000':
+            transportFee = "1000元 (30KM内)";
+            break;
+        default:
+            transportFee = undefined;
+            break;
+    }
+    if(transportFee) {
+        let row = tableBody.insertRow();
+        row.insertCell(0).innerHTML = "特种车辆运送费";
+        row.insertCell(1).innerHTML = transportFee;
+    }
+}
+// 缝合费用
+let stitchingFee = document.getElementById("stitching").value;
+if(stitchingFee && parseFloat(stitchingFee) != 0) {
+    let row = tableBody.insertRow();
+    row.insertCell(0).innerHTML = "缝合费用";
+    row.insertCell(1).innerHTML = stitchingFee + "元";
+}
+
+}
+</script>
+
+</body>
+</html>
