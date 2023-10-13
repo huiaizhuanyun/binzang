@@ -118,9 +118,10 @@
         let count = Number(bodyExaminationTable.value);
         if(bodyExaminationTable.value && Number(bodyExaminationTable.value) > 0) {
             let bodyExaminationFee = 400 * count; 
-            total += 400;
-            recordServiceTotal += 400;
+            total += bodyExaminationFee;
+            recordServiceTotal += bodyExaminationFee;
         }
+
 
         // 现场运尸费
         if(document.getElementById("corpseTransport").checked) {
