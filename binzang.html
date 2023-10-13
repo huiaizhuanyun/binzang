@@ -17,7 +17,8 @@
 <input type="checkbox" id="disinfect" onchange="calculateTotal()"> 消毒费 (100元/次)<br>
 <input type="checkbox" id="carryCorpse" onchange="calculateTotal()"> 抬尸费 (400元/次)<br>
 <input type="checkbox" id="bodyBag" onchange="calculateTotal()"> 尸体袋 (260元/次)<br>
-<input type="checkbox" id="inspectionFee" onchange="calculateTotal()"> 尸体检验台使用费 (400元/次)<br>
+<input type="number" id="bodyExaminationTable" name="bodyExaminationTable" placeholder="请输入次数">
+尸体检验台使用费
 <input type="checkbox" id="corpseTransport" onchange="calculateTotal()"> 现场运尸费 (600元/次)<br>
 <input type="checkbox" id="prepFee" onchange="calculateTotal()"> 料理费 (400元/次)<br>
 
@@ -258,10 +259,13 @@ if (isNaN(stitchingFee)) stitchingFee = 0;  // 如果不是数字，则设置为
 }
 
 // 尸体检验台使用费
-         if(document.getElementById("inspectionFee").checked) {
+         let bodyExaminationTable = document.getElementById('bodyExaminationTable');
+         if(bodyExaminationTable.value && Number(bodyExaminationTable.value) > 0) {
+             let bodyExaminationFee = 400 * Number(bodyExaminationTable.value); // 计算费用
+             // 将bodyExaminationFee添加到总金额和表格
              let row = tableBody.insertRow();
              row.insertCell(0).innerHTML = "尸体检验台使用费";
-             row.insertCell(1).innerHTML = "400元";
+             row.insertCell(1).innerHTML = bodyExaminationFee + "元";
 }
 
 // 现场运尸费
