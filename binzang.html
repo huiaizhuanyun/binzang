@@ -115,8 +115,9 @@
 
         // 尸体检验台使用费
         let bodyExaminationTable = document.getElementById('bodyExaminationTable');
+        let count = Number(bodyExaminationTable.value);
         if(bodyExaminationTable.value && Number(bodyExaminationTable.value) > 0) {
-            let bodyExaminationFee = 400 * Number(bodyExaminationTable.value); 
+            let bodyExaminationFee = 400 * count; 
             total += 400;
             recordServiceTotal += 400;
         }
