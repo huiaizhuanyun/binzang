@@ -4,6 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>汇爱殡葬服务费用计算</title>
+<form id="deceasedInfoForm">
+    <div>
+        <label for="name">姓名：</label>
+        <input type="text" id="name" name="name" required>
+    </div>
+    
+    <div>
+        <label for="age">年龄：</label>
+        <input type="number" id="age" name="age" min="0" required>
+    </div>
+    
+    <div>
+        <label for="gender">性别：</label>
+        <input type="radio" id="male" name="gender" value="男" required> 男
+        <input type="radio" id="female" name="gender" value="女"> 女
+    </div>
+    
+    <div>
+        <label for="relativeName">家属姓名：</label>
+        <input type="text" id="relativeName" name="relativeName" required>
+    </div>
+    
+    <div>
+        <label for="address">家庭住址：</label>
+        <input type="text" id="address" name="address" required>
+    </div>
+
+    <div>
+        <label for="relativePhone">家属电话：</label>
+        <input type="tel" id="relativePhone" name="relativePhone" required>
+    </div>
+
+    <div>
+        <label for="parkingTime">停放时间：</label>
+        <input type="number" id="year" name="year" value="2023" min="2023" max="2099" required> 年
+        <input type="number" id="month" name="month" value="1" min="1" max="12" required> 月
+        <input type="number" id="day" name="day" value="1" min="1" max="31" required> 日
+        <input type="number" id="hour" name="hour" value="0" min="0" max="23" required> 时
+        <input type="number" id="minute" name="minute" value="0" min="0" max="59" required> 分
+    </div>
+
+    <div>
+        <label for="source">来源：</label>
+        <select id="source" name="source" required>
+            <option value="公路">公路</option>
+            <option value="急救">急救</option>
+            <option value="病房">病房</option>
+            <option value="其他">其他</option>
+        </select>
+    </div>
+  <div>
+        <label for="address">备注：</label>
+        <input type="text" id="address" name="address" required>
+    </div>
+
+    <!-- 如果您希望用户可以提交这个表单，您还可以添加一个提交按钮，如： -->
+    <!-- <input type="submit" value="提交"> -->
+
+</form>
+
 </head>
 <body>
 
