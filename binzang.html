@@ -53,8 +53,8 @@
 <input type="radio" name="specialTransport" value="800" onchange="calculateTotal()"> 800元 (20KM内)<br>
 <input type="radio" name="specialTransport" value="1000" onchange="calculateTotal()"> 1000元 (30KM内)<br>
 
-<label for="stitching">缝合费用:</label>
-<input type="number" id="bodyExaminationTable" name="bodyExaminationTable" placeholder="请输入次数" onchange="calculateTotal()">
+<label for="stitchingFee">缝合费用:</label>
+<input type="number" id="stitchingFee" name="stitchingFee" placeholder="请输入次数" onchange="calculateTotal()">
 
 <p id="loveTotal">汇爱服务项目总费用: 0</p>
 
@@ -164,12 +164,13 @@
         }
 
         // 缝合费用
-        let stitchingFee = parseFloat(document.getElementById("stitching").value);
-if (isNaN(stitchingFee)) stitchingFee = 0;  // 如果不是数字，则设置为0
+        let stitchingFee = parseFloat(document.getElementById("stitchingFee").value);
+        if (isNaN(stitchingFee)) stitchingFee = 0;  // 如果不是数字，则设置为0
         if(stitchingFee) {
             total += parseFloat(stitchingFee);
             loveServiceTotal += parseFloat(stitchingFee);
         }
+
 
          // 太空被费用
          if(document.getElementById("spaceBlanket").checked) {
