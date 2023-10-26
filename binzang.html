@@ -95,8 +95,11 @@
 <!-- 洗发、理发、刮胡子费用 -->
 <input type="checkbox" id="haircare" onchange="calculateTotal()"> 洗发、理发、刮胡子 (200元/次)<br>
 
-<!-- 化妆费用 -->
-<input type="checkbox" id="makeup" onchange="calculateTotal()"> 化妆 (600元/次)<br>
+<h4>化妆美容</h4>
+<!-- 在擦洗穿衣部分增加“不使用”选项 -->
+<input type="radio" name="makeup" value="0" onchange="calculateTotal()" checked> 不使用<br>
+<input type="radio" name="makeup" value="600" onchange="calculateTotal()"> 600元 (公共化妆品)<br>
+<input type="radio" name="makeup" value="800" onchange="calculateTotal()"> 800元 (一次性化妆品)<br>
 
 <!-- 太空被费用 -->
 <input type="checkbox" id="spaceBlanket" onchange="calculateTotal()"> 太空被 (200元/套)<br>
@@ -206,10 +209,12 @@
         }
 
         // 化妆费
-        if(document.getElementById("makeup").checked) {
-        total += 600;
-        loveServiceTotal += 600;
+        let makeup = document.querySelector('input[name="makeup"]:checked');
+        if(makeup) {
+        total += parseFloat(makeup.value);
+        loveServiceTotal += parseFloat(makeup.value);
         }
+
 
         // 特种车辆运送费
         let specialTransport = document.querySelector('input[name="specialTransport"]:checked');
@@ -356,10 +361,11 @@ if(washAndDress && parseFloat(washAndDress.value) !== 0) {
 }
 
 // 化妆费
-if(document.getElementById("makeup").checked) {
+let makeup = document.querySelector('input[name="makeup"]:checked');
+if(makeup && parseFloat(makeup.value) !== 0) {
     let row = tableBody.insertRow();
-    row.insertCell(0).innerHTML = "化妆";
-    row.insertCell(1).innerHTML = "600元";
+    row.insertCell(0).innerHTML = "化妆美容";
+    row.insertCell(1).innerHTML = parseFloat(makeup.value) + "元";
 }
 
 // 太空被费用
