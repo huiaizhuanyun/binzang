@@ -93,6 +93,29 @@
             <label for="notes">备注：</label>
             <textarea id="notes" name="notes" rows="4"></textarea>
             
+<!-- 贫困家庭减免选项 开始 -->
+<label for="showOptions">贫困家庭减免选项</label>
+<input type="checkbox" id="showOptions" name="showOptions" onchange="toggleOptions()">
+
+<div id="subsidyOptions" style="display: none;">
+    <label for="disinfectionFee">使用环境消毒费</label>
+    <input type="checkbox" id="disinfectionFee" name="disinfectionFee">
+    
+    <label for="bodyBag">使用尸体袋</label>
+    <input type="checkbox" id="bodyBag" name="bodyBag">
+    
+    <label for="spaceBlanket">使用太空被</label>
+    <input type="checkbox" id="spaceBlanket" name="spaceBlanket">
+    
+    <label for="storageDays">停保天数：</label>
+    <input type="number" id="storageDays" name="storageDays" min="0" required>
+</div>
+<!-- 贫困家庭减免选项 结束 -->
+
+<!-- 计算按钮 -->
+<button type="button" onclick="calculateSubsidy()">计算可补贴金额</button>
+<div id="subsidyAmount" style="margin-top: 20px;"></div>
+
         </form>
     </div>
 </body>
@@ -643,6 +666,43 @@ document.querySelectorAll('input[type=radio]').forEach(radio => {
             radio.setAttribute('data-checked', 'true');
         }
     });
+});
+document.getElementById('customPackage').addEventListener('change', function() {
+    var customInput = document.getElementById('customPackageAmount');
+    if(this.checked) {
+        customInput.style.display = 'block';
+    } else {
+        customInput.style.display = 'none';
+    }
+});
+
+function toggleOptions() {
+    var showOptionsCheckbox = document.getElementById('showOptions');
+    var optionsDiv = document.getElementById('subsidyOptions');
+    if (showOptionsCheckbox.checked) {
+        optionsDiv.style.display = 'block';
+    } else {
+        optionsDiv.style.display = 'none';
+    }
+}
+
+function calculateSubsidy() {
+    var disinfectionFee = document.getElementById('disinfectionFee').checked ? 100 : 0;
+    var bodyBag = document.getElementById('bodyBag').checked ? 210 : 0;
+    var spaceBlanket = document.getElementById('spaceBlanket').checked ? 100 : 0;
+    var storageDays = parseInt(document.getElementById('storageDays').value);
+    var additionalSubsidy = storageDays > 2 ? (storageDays - 2) * 60 : 0;
+    
+    var totalSubsidy = disinfectionFee + bodyBag + spaceBlanket + additionalSubsidy;
+    
+    document.getElementById('subsidyAmount').innerText = "可减免费用为：" + totalSubsidy + "元";
+}
+
+</script>
+
+</body>
+</html>
+
 });
 document.getElementById('customPackage').addEventListener('change', function() {
     var customInput = document.getElementById('customPackageAmount');
