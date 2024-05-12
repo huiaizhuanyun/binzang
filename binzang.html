@@ -237,6 +237,9 @@ body {
 
 <h3>汇爱服务项目</h3>
 
+<label for="stitching">缝合费用:</label>
+<input type="number" id="stitching" onchange="calculateTotal()"><br>
+
 
 <h4>服务套餐</h4>
 <input type="radio" name="servicePackage" value="2860" onchange="calculateTotal()"> 套餐一 2860元<br>
@@ -245,14 +248,25 @@ body {
 <input type="radio" id="customPackage" name="servicePackage" value="custom" onchange="calculateTotal()"> 自选金额
 <input type="number" id="customPackageAmount" style="display:none;" onchange="calculateTotal()">
 
+<h4>清洁口鼻腔耳道、刮胡、修甲、修鼻<h4>
+<input type="radio" name="xiu" value="0" onchange="calculateTotal()" checked> 不使用
+<input type="radio" name="xiu" value="260" onchange="calculateTotal()"> 260元 (一项)
+<input type="radio" name="xiu" value="500" onchange="calculateTotal()"> 500元 (多项)<br>
+
+<!-- 洗发、理发 -->
+<input type="checkbox" id="haircare" onchange="calculateTotal()"> 洗发或理发 (300元/次)<br>
+
+<!-- 沐浴露洗澡 -->
+<input type="checkbox" id="muyulu" onchange="calculateTotal()"> 沐浴露洗澡 (260元/次)<br>
+
 <h4>擦洗穿衣</h4>
 <!-- 在擦洗穿衣部分增加“不使用”选项 -->
 <input type="radio" name="washAndDress" value="0" onchange="calculateTotal()" checked> 不使用<br>
 <input type="radio" name="washAndDress" value="800" onchange="calculateTotal()"> 800元 (1位师傅)<br>
 <input type="radio" name="washAndDress" value="1500" onchange="calculateTotal()"> 1500元 (多位师傅)<br>
 
-<!-- 洗发、理发、刮胡子费用 -->
-<input type="checkbox" id="haircare" onchange="calculateTotal()"> 洗发、理发、刮胡子 (300元/次)<br>
+<!-- 白布毛巾费用 -->
+<input type="checkbox" id="whiteTowel" onchange="calculateTotal()"> 白布毛巾 (100元)<br>
 
 <h4>化妆美容</h4>
 <!-- 在擦洗穿衣部分增加“不使用”选项 -->
@@ -261,19 +275,16 @@ body {
 <input type="radio" name="makeup" value="1000" onchange="calculateTotal()"> 1000元 (一次性化妆品)<br>
 <input type="radio" name="makeup" value="1200" onchange="calculateTotal()"> 1200元 (厘雅高端化妆品)<br>
 
-<!-- 白布毛巾费用 -->
-<input type="checkbox" id="whiteTowel" onchange="calculateTotal()"> 白布毛巾 (100元)<br>
-
-<!-- CT预约、抬尸、会诊费用 -->
+<!--CT预约、抬尸、会诊费用 -->
 <input type="checkbox" id="ctAppointment" onchange="calculateTotal()"> CT预约、抬尸、会诊 (500元/次)<br>
+
 <h4>特种车辆运送费</h4>
 <input type="radio" name="specialTransport" value="0" onchange="calculateTotal()" checked> 不使用<br>
 <input type="radio" name="specialTransport" value="600" onchange="calculateTotal()"> 600元 (10KM内)<br>
 <input type="radio" name="specialTransport" value="800" onchange="calculateTotal()"> 800元 (20KM内)<br>
 <input type="radio" name="specialTransport" value="1000" onchange="calculateTotal()"> 1000元 (30KM内)<br>
 
-<label for="stitching">缝合费用:</label>
-<input type="number" id="stitching" onchange="calculateTotal()"><br>
+
 
 <p id="loveTotal">汇爱服务项目总费用: 0</p>
 
@@ -393,6 +404,19 @@ body {
         if(document.getElementById("haircare").checked) {
             total += 300;
             loveServiceTotal += 300;
+        }
+
+        // 沐浴露
+        if(document.getElementById("muyulu").checked) {
+            total += 260;
+            loveServiceTotal += 260;
+        }
+
+        // 清洁xiu
+        let xiu = document.querySelector('input[name="xiu"]:checked');
+        if(xiu) {
+        total += parseFloat(xiu.value);
+        loveServiceTotal += parseFloat(xiu.value);
         }
 
         // 化妆费
@@ -555,6 +579,12 @@ if(document.getElementById("haircare").checked) {
     let row = tableBody.insertRow();
     row.insertCell(0).innerHTML = "洗发、理发、刮胡子";
     row.insertCell(1).innerHTML = "300元";
+}
+
+if(document.getElementById("muyulu").checked) {
+    let row = tableBody.insertRow();
+    row.insertCell(0).innerHTML = "沐浴露洗澡";
+    row.insertCell(1).innerHTML = "260元";
 }
 
 // 擦洗穿衣费
