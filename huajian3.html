@@ -305,7 +305,7 @@
                 <label><input type="checkbox" class="service" data-category="辅助服务" data-name="料理费" data-price="200"> 料理费（协助抬尸、清洗、处理等）：200元/次</label>
             </div>
             <div class="service-item">
-                <label><input type="checkbox" class="service" data-category="辅助服务" data-name="CT服务费" data-price="200"> CT服务费（仅包括CT预约及抬尸协助，会诊，不包含CT费）：300元/次</label>
+                <label><input type="checkbox" class="service" data-category="辅助服务" data-name="CT服务费" data-price="300"> CT服务费（仅包括CT预约及抬尸协助，会诊，不包含CT费）：300元/次</label>
             </div>
         </div>
 
@@ -476,3 +476,607 @@
     </div>
 </div>
 
+<script>
+    let mediaRecorder;
+    let chunks = [];
+    let recordingType;
+    let calculatedTotal = 0;
+
+    function startRecording(mode) {
+        recordingType = mode;
+        const constraints = mode === 'audio' ? { audio: true } : { audio: true, video: true };
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+                chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: mode === 'audio' ? 'audio/webm' : 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = mode + '_' + new Date().toISOString() + '.webm';
+                    a.click();
+                };
+            })
+            .catch(error => console.error('Error starting recording:', error));
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+    }
+
+    // 自动生成年龄和性别
+    document.getElementById('idNumber').addEventListener('input', function() {
+        var id = this.value;
+        var gender = '';
+
+        if (id.length === 15 || id.length === 18) {
+            // 获取性别
+            var genderDigit = id.length === 18 ? id.charAt(16) : id.charAt(14);
+            gender = parseInt(genderDigit) % 2 === 1 ? '男' : '女';
+            document.getElementById('gender').value = gender;
+
+            // 获取出生日期并计算年龄
+            var birthYear = id.length === 18 ? id.substr(6, 4) : '19' + id.substr(6, 2);
+            var birthMonth = id.length === 18 ? id.substr(10, 2) : id.substr(8, 2);
+            var birthDay = id.length === 18 ? id.substr(12, 2) : id.substr(10, 2);
+            var birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+            var today = new Date();
+            var age = today.getFullYear() - birthDate.getFullYear();
+            var monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            // 仅在年龄字段为空或未被手动修改时更新
+            if (!document.getElementById('age').dataset.manuallyChanged) {
+                document.getElementById('age').value = age;
+            }
+        }
+    });
+
+    // 标记年龄字段是否被手动修改
+    document.getElementById('age').addEventListener('input', function() {
+        this.dataset.manuallyChanged = true;
+    });
+
+    // 根据家属电话获取归属地
+    document.getElementById('familyPhone').addEventListener('blur', function() {
+        var phone = this.value;
+        if (phone.length >= 7) {
+            // 使用您提供的API进行查询
+            var url = 'http://open.liupai.net/shouji/query';
+
+            var params = {
+                '311617917bf46afe': '244a4a2b399902b23617270d958f7321',
+                'phone': phone
+            };
+
+            var formData = new FormData();
+            for (var key in params) {
+                formData.append(key, params[key]);
+            }
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.status === '200') {
+                    var result = data.result;
+                    document.getElementById('phoneLocation').innerText = '归属地：' + result.province + ' ' + result.city;
+                } else {
+                    document.getElementById('phoneLocation').innerText = '归属地：查询失败';
+                }
+            })
+            .catch(() => {
+                document.getElementById('phoneLocation').innerText = '归属地：查询异常';
+            });
+        }
+    });
+
+    // 上楼搬抬费显示楼层输入
+    document.getElementById('upstairsFee').addEventListener('change', function() {
+        if (this.value === '100') {
+            document.getElementById('stairsInput').classList.remove('hidden');
+        } else {
+            document.getElementById('stairsInput').classList.add('hidden');
+        }
+    });
+
+    // 太空被数量输入
+    document.getElementById('spaceQuilt').addEventListener('change', function() {
+        if (this.value === '100') {
+            document.getElementById('quiltQuantity').classList.remove('hidden');
+        } else {
+            document.getElementById('quiltQuantity').classList.add('hidden');
+        }
+    });
+
+    // 化妆服务选择
+    document.getElementById('makeupService').addEventListener('change', function() {
+        if (this.value === '单选服务') {
+            document.getElementById('singleServices').classList.remove('hidden');
+        } else {
+            document.getElementById('singleServices').classList.add('hidden');
+        }
+    });
+
+    // 服务标题点击展开内容
+    var serviceHeaders = document.querySelectorAll('.service-header');
+    serviceHeaders.forEach(function(header) {
+        header.addEventListener('click', function() {
+            var content = this.nextElementSibling;
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                this.style.setProperty('--after-content', '"▲"');
+            } else {
+                content.style.display = 'none';
+                this.style.setProperty('--after-content', '"▼"');
+            }
+        });
+    });
+
+    // 自动计算冷冻停保费时间
+    document.getElementById('storageTime').addEventListener('change', function() {
+        var storageTime = new Date(this.value);
+        var now = new Date();
+        var diff = now - storageTime;
+        if (diff > 0) {
+            var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            var hours = Math.ceil((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            document.getElementById('freezingDays').value = days;
+            document.getElementById('freezingHours').value = hours;
+        }
+    });
+
+    // 计算总费用
+    function calculateTotal() {
+        calculatedTotal = 0;
+        var bill = {};
+
+        // 接尸服务费选择
+        var transportFee = document.getElementById('transportFee');
+        if (transportFee.value) {
+            var price = parseFloat(transportFee.value);
+            var name = transportFee.options[transportFee.selectedIndex].getAttribute('data-name');
+            if (!bill['接尸服务']) {
+                bill['接尸服务'] = [];
+            }
+            bill['接尸服务'].push({name: '接运车费 - ' + name, price: price});
+            calculatedTotal += price;
+        }
+
+        // 其他接尸服务
+        var services = document.querySelectorAll('.service:checked:not(:disabled)');
+        services.forEach(function(service) {
+            var price = parseFloat(service.getAttribute('data-price'));
+            var category = service.getAttribute('data-category');
+            var name = service.getAttribute('data-name');
+
+            if (!bill[category]) {
+                bill[category] = [];
+            }
+            bill[category].push({name: name, price: price});
+
+            calculatedTotal += price;
+        });
+
+        // 接尸服务费默认多位师傅
+        var corpseServiceFee = document.getElementById('corpseServiceFee');
+        if (corpseServiceFee.value) {
+            var price = parseFloat(corpseServiceFee.value);
+            var name = corpseServiceFee.options[corpseServiceFee.selectedIndex].getAttribute('data-name');
+            if (!bill['接尸服务']) {
+                bill['接尸服务'] = [];
+            }
+            bill['接尸服务'].push({name: '接尸服务费 - ' + name, price: price});
+            calculatedTotal += price;
+        }
+
+        // 上楼搬抬费
+        var upstairsFee = document.getElementById('upstairsFee');
+        if (upstairsFee.value === '100') {
+            var floors = parseInt(document.getElementById('stairsFloors').value) || 0;
+            var price = floors * 100;
+            if (!bill['接尸服务']) {
+                bill['接尸服务'] = [];
+            }
+            bill['接尸服务'].push({name: '上楼搬抬费（步梯 ' + floors + ' 层）', price: price});
+            calculatedTotal += price;
+        } else if (upstairsFee.value === '0' && upstairsFee.options[upstairsFee.selectedIndex].getAttribute('data-name') === '有担架电梯') {
+            if (!bill['接尸服务']) {
+                bill['接尸服务'] = [];
+            }
+            bill['接尸服务'].push({name: '上楼搬抬费（有担架电梯）', price: 0});
+        }
+
+        // 死亡时间超过20小时
+        if (document.getElementById('over20Hours').checked) {
+            var price = parseFloat(document.getElementById('over20Hours').getAttribute('data-price'));
+            if (!bill['接尸服务']) {
+                bill['接尸服务'] = [];
+            }
+            bill['接尸服务'].push({name: '死亡时间超过20小时', price: price});
+            calculatedTotal += price;
+        }
+
+        // 腐烂情况加收
+        if (document.getElementById('decomposition').checked) {
+            var price = parseFloat(document.getElementById('decomposition').getAttribute('data-price'));
+            if (!bill['接尸服务']) {
+                bill['接尸服务'] = [];
+            }
+            bill['接尸服务'].push({name: '腐烂情况加收', price: price});
+            calculatedTotal += price;
+        }
+
+        // 冷冻停保费
+        var freezingDays = parseFloat(document.getElementById('freezingDays').value) || 0;
+        var freezingHours = parseFloat(document.getElementById('freezingHours').value) || 0;
+        var freezingFee = 0;
+
+        if (freezingDays > 0) {
+            freezingFee += freezingDays * 380;
+        }
+
+        if (freezingHours > 0) {
+            var hourlyFee = freezingHours * 100;
+            hourlyFee = hourlyFee > 380 ? 380 : hourlyFee;
+            freezingFee += hourlyFee;
+        }
+
+        if (freezingFee > 0) {
+            if (!bill['停放与保存服务']) {
+                bill['停放与保存服务'] = [];
+            }
+            bill['停放与保存服务'].push({name: '冷冻停保费', price: freezingFee});
+            calculatedTotal += freezingFee;
+        }
+
+        // 必选的环境消毒费和环境卫生费
+        var mandatoryServices = document.querySelectorAll('.service:checked:disabled');
+        mandatoryServices.forEach(function(service) {
+            var price = parseFloat(service.getAttribute('data-price'));
+            var category = service.getAttribute('data-category');
+            var name = service.getAttribute('data-name');
+
+            if (!bill[category]) {
+                bill[category] = [];
+            }
+            bill[category].push({name: name, price: price});
+            calculatedTotal += price;
+        });
+
+        // 太空被
+        var spaceQuilt = document.getElementById('spaceQuilt');
+        if (spaceQuilt.value) {
+            var price = parseFloat(spaceQuilt.value);
+            var name = spaceQuilt.options[spaceQuilt.selectedIndex].getAttribute('data-name');
+
+            if (spaceQuilt.value === '100') {
+                var count = parseInt(document.getElementById('quiltCount').value) || 0;
+                price *= count;
+                name += ' x ' + count + '条';
+            }
+
+            if (!bill['停放与保存服务']) {
+                bill['停放与保存服务'] = [];
+            }
+            bill['停放与保存服务'].push({name: name, price: price});
+            calculatedTotal += price;
+        } else {
+            // 默认200元/套
+            var price = 200;
+            var name = '太空被（200元/套）';
+            if (!bill['停放与保存服务']) {
+                bill['停放与保存服务'] = [];
+            }
+            bill['停放与保存服务'].push({name: name, price: price});
+            calculatedTotal += price;
+        }
+
+        // 值守服务
+        var dayGuardHours = parseFloat(document.getElementById('dayGuardHours').value) || 0;
+        var nightGuardHours = parseFloat(document.getElementById('nightGuardHours').value) || 0;
+        var guardFee = 0;
+
+        var totalGuardHours = dayGuardHours + nightGuardHours;
+
+        if (totalGuardHours > 2) {
+            var extraHours = totalGuardHours - 2;
+            var dayFee = dayGuardHours * 30;
+            var nightFee = nightGuardHours * 50;
+            guardFee = dayFee + nightFee;
+
+            if (!bill['值守服务']) {
+                bill['值守服务'] = [];
+            }
+            if (dayGuardHours > 0) {
+                bill['值守服务'].push({name: '白天值守 ' + dayGuardHours + ' 小时', price: dayFee});
+            }
+            if (nightGuardHours > 0) {
+                bill['值守服务'].push({name: '夜间值守 ' + nightGuardHours + ' 小时', price: nightFee});
+            }
+            calculatedTotal += guardFee;
+        }
+
+        // 回家服务
+        var homeDistance = parseFloat(document.getElementById('homeDistance').value) || 0;
+        var homeFee = 0;
+        var roadFee = 0;
+        var homeName = '';
+
+        if (homeDistance > 0) {
+            if (homeDistance <= 10) {
+                homeFee = 600;
+                homeName = '回家服务（10公里内）';
+            } else if (homeDistance <= 20) {
+                homeFee = 700;
+                homeName = '回家服务（20公里内）';
+            } else if (homeDistance <= 30) {
+                homeFee = 800;
+                homeName = '回家服务（30公里内）';
+            } else if (homeDistance <= 40) {
+                homeFee = 1000;
+                homeName = '回家服务（40公里内）';
+            } else if (homeDistance <= 50) {
+                homeFee = 1200;
+                homeName = '回家服务（50公里内）';
+            } else if (homeDistance <= 200) {
+                homeFee = homeDistance * 2 * 12;
+                homeName = '回家服务（' + homeDistance + '公里，50-200公里）';
+            } else {
+                homeFee = homeDistance * 2 * 10;
+                homeName = '回家服务（' + homeDistance + '公里，200公里以上）';
+            }
+
+            if (homeDistance > 70) {
+                roadFee = homeDistance * 0.5;
+                homeName += '，路桥费：' + roadFee.toFixed(2) + '元';
+            }
+
+            if (!bill['回家服务']) {
+                bill['回家服务'] = [];
+            }
+            bill['回家服务'].push({name: homeName, price: homeFee + roadFee});
+            calculatedTotal += homeFee + roadFee;
+        }
+
+        // 缝合服务
+        var sutureLength = parseFloat(document.getElementById('sutureLength').value) || 0;
+        var sutureFee = 0;
+        var sutureMultiplier = 1;
+
+        if (document.getElementById('filling').checked || document.getElementById('skullImplant').checked) {
+            sutureMultiplier = 2;
+        }
+
+        if (sutureLength > 0) {
+            sutureFee = (340 + 160 * sutureLength) * sutureMultiplier;
+            sutureFee = sutureFee > 10000 ? 10000 : sutureFee;
+            var sutureName = '缝合服务';
+            if (document.getElementById('filling').checked) {
+                sutureName += '（需填充）';
+            }
+            if (document.getElementById('skullImplant').checked) {
+                sutureName += '（颅骨植入）';
+            }
+            if (!bill['缝合服务']) {
+                bill['缝合服务'] = [];
+            }
+            bill['缝合服务'].push({name: sutureName, price: sutureFee});
+            calculatedTotal += sutureFee;
+        }
+
+        // 整洁穿衣化妆服务
+        var makeupService = document.getElementById('makeupService').value;
+        if (makeupService) {
+            if (makeupService.startsWith('套餐')) {
+                var price = 0;
+                var name = '';
+                if (makeupService === '套餐1') {
+                    price = 2860;
+                    name = '整洁穿衣化妆服务 - 套餐1';
+                } else if (makeupService === '套餐2') {
+                    price = 3560;
+                    name = '整洁穿衣化妆服务 - 套餐2';
+                } else if (makeupService === '套餐3') {
+                    price = 3960;
+                    name = '整洁穿衣化妆服务 - 套餐3';
+                }
+                if (!bill['整洁穿衣化妆服务']) {
+                    bill['整洁穿衣化妆服务'] = [];
+                }
+                bill['整洁穿衣化妆服务'].push({name: name, price: price});
+                calculatedTotal += price;
+            } else if (makeupService === '单选服务') {
+                var singleServices = document.querySelectorAll('#singleServices input[type="checkbox"]:checked');
+                singleServices.forEach(function(service) {
+                    var price = parseFloat(service.getAttribute('data-price'));
+                    var category = service.getAttribute('data-category');
+                    var name = service.getAttribute('data-name');
+
+                    if (!bill[category]) {
+                        bill[category] = [];
+                    }
+                    bill[category].push({name: name, price: price});
+
+                    calculatedTotal += price;
+                });
+
+                // 擦干穿衣服务
+                var dressingService = document.getElementById('dressingService');
+                if (dressingService.value) {
+                    var price = parseFloat(dressingService.value);
+                    var name = dressingService.options[dressingService.selectedIndex].getAttribute('data-name');
+                    if (!bill['整洁穿衣化妆服务']) {
+                        bill['整洁穿衣化妆服务'] = [];
+                    }
+                    bill['整洁穿衣化妆服务'].push({name: '擦干穿衣 - ' + name, price: price});
+                    calculatedTotal += price;
+                }
+
+                // 化妆服务
+                var makeupOption = document.getElementById('makeupOption');
+                if (makeupOption.value) {
+                    var price = parseFloat(makeupOption.value);
+                    var name = makeupOption.options[makeupOption.selectedIndex].getAttribute('data-name');
+                    if (!bill['整洁穿衣化妆服务']) {
+                        bill['整洁穿衣化妆服务'] = [];
+                    }
+                    bill['整洁穿衣化妆服务'].push({name: name, price: price});
+                    calculatedTotal += price;
+                }
+            }
+        }
+
+        // 额外用品金额
+        var additionalAmount = parseFloat(document.getElementById('additionalAmount').value) || 0;
+        if (additionalAmount > 0) {
+            if (!bill['额外用品金额']) {
+                bill['额外用品金额'] = [];
+            }
+            bill['额外用品金额'].push({name: '额外用品金额', price: additionalAmount});
+            calculatedTotal += additionalAmount;
+        }
+
+        // 显示总费用
+        document.getElementById('totalAmount').innerText = '总费用：' + (Math.round(calculatedTotal) === calculatedTotal ? calculatedTotal : calculatedTotal.toFixed(2)) + '元';
+
+        // 隐藏风水价
+        document.getElementById('fengshuiPrice').classList.add('hidden');
+
+        // 显示费用清单
+        var billDetails = document.getElementById('billDetails');
+        billDetails.style.display = 'block';
+        billDetails.innerHTML = '<h2>费用清单</h2>';
+
+        for (var category in bill) {
+            var categoryDiv = document.createElement('div');
+            categoryDiv.className = 'bill-item';
+            var categoryTitle = document.createElement('h3');
+            categoryTitle.innerText = category;
+            categoryDiv.appendChild(categoryTitle);
+
+            var servicesDiv = document.createElement('div');
+            servicesDiv.className = 'bill-service';
+
+            var categorySum = 0;
+            bill[category].forEach(function(item) {
+                var serviceP = document.createElement('p');
+                serviceP.innerText = item.name + '：' + (Math.round(item.price) === item.price ? item.price : item.price.toFixed(2)) + '元';
+                servicesDiv.appendChild(serviceP);
+                categorySum += item.price;
+            });
+
+            var subtotalP = document.createElement('p');
+            subtotalP.className = 'subtotal';
+            subtotalP.innerText = '小计：' + (Math.round(categorySum) === categorySum ? categorySum : categorySum.toFixed(2)) + '元';
+            servicesDiv.appendChild(subtotalP);
+
+            categoryDiv.appendChild(servicesDiv);
+            billDetails.appendChild(categoryDiv);
+        }
+
+        // 添加收款码
+        var qrcodeContainer = document.createElement('div');
+        qrcodeContainer.className = 'qrcode-container';
+        qrcodeContainer.innerHTML = `
+            <div>
+                <img src="qrcode_wechat.jpg" alt="微信收款码">
+                <p>微信收款码</p>
+            </div>
+            <div>
+                <img src="qrcode_alipay.jpg" alt="支付宝收款码">
+                <p>支付宝收款码</p>
+            </div>
+            <div>
+                <img src="qrcode_unionpay.jpg" alt="银联收款码">
+                <p>银联收款码</p>
+            </div>
+        `;
+        billDetails.appendChild(qrcodeContainer);
+
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function showFengshui() {
+        if (calculatedTotal === 0) {
+            alert('请先计算总费用');
+            return;
+        }
+        var fengshuiPrice = calculateFengshuiPrice(calculatedTotal);
+        var fengshuiDiv = document.getElementById('fengshuiPrice');
+        if (fengshuiPrice) {
+            fengshuiDiv.innerText = '风水价：' + fengshuiPrice.price + '元（' + fengshuiPrice.explanation + '）';
+        } else {
+            var reducedPrice = calculatedTotal - 103;
+            fengshuiDiv.innerText = '风水价：' + reducedPrice + '元（五行相生，祝愿逝者转生顺利，吉祥平安）';
+        }
+        fengshuiDiv.classList.remove('hidden');
+    }
+
+    // 计算风水价
+    function calculateFengshuiPrice(total) {
+        var min = total - 300 > 0 ? total - 300 : 0;
+        for (var price = total; price >= min; price--) {
+            var priceStr = String(Math.floor(price));
+            if (priceStr.length !== 4) continue;
+
+            var num1 = parseInt(priceStr.charAt(0));
+            var num2 = parseInt(priceStr.charAt(1));
+            var num3 = parseInt(priceStr.charAt(2));
+            var num4 = parseInt(priceStr.charAt(3));
+
+            var element1 = getElement(num1);
+            var element2 = getElement(num2);
+            var element3 = getElement(num3);
+            var element4 = getElement(num4);
+
+            if (element1 && element2 && element3 && element4) {
+                if (isGenerating(element1, element2) && isGenerating(element2, element3) && isGenerating(element3, element4)) {
+                    var explanation = num1 + element1 + '生' + num2 + element2 + '，' + num2 + element2 + '生' + num3 + element3 + '，' + num3 + element3 + '生' + num4 + element4 + '，五行流转，祝愿逝者转世顺利，幸福安康';
+                    return {price: price, explanation: explanation};
+                }
+            }
+        }
+        return null;
+    }
+
+    // 获取数字对应的五行
+    function getElement(num) {
+        var elements = {
+            1: '水',
+            6: '水',
+            2: '火',
+            7: '火',
+            3: '木',
+            8: '木',
+            4: '金',
+            9: '金',
+            5: '土',
+            0: '土'
+        };
+        return elements[num];
+    }
+
+    // 判断五行是否相生
+    function isGenerating(element1, element2) {
+        var generating = {
+            '金': '水',
+            '水': '木',
+            '木': '火',
+            '火': '土',
+            '土': '金'
+        };
+        return generating[element1] === element2;
+    }
+</script>
+
+</body>
+</html>
