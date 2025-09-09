@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汇爱服务费用计算</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #007AFF;
+            --secondary-color: #5856D6;
+            --success-color: #34C759;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --dark: #1D1D1F;
+            --gray: #86868B;
+            --light-gray: #F2F2F7;
+            --white: #FFFFFF;
+            --shadow: 0 10px 40px rgba(0,0,0,0.08);
+            --shadow-hover: 0 20px 60px rgba(0,0,0,0.12);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: var(--dark);
+            animation: backgroundShift 20s ease infinite;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            25% { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+            50% { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+            75% { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        }
+
+        /* 背景装饰元素 */
+        .bg-decoration {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 20s infinite ease-in-out;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .bg-decoration:nth-child(1) {
+            top: -250px;
+            left: -250px;
+            animation-delay: 0s;
+        }
+
+        .bg-decoration:nth-child(2) {
+            bottom: -250px;
+            right: -250px;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.8s ease-out;
+            transition: var(--transition);
+        }
+
+        .container:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            animation: fadeInScale 1s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-gray);
+            position: relative;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s ease;
+        }
+
+        h2:hover::after {
+            width: 100%;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin: 25px 0 15px;
+            padding: 10px 15px;
+            background: var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        h3::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        h3:hover::before {
+            left: 100%;
+        }
+
+        h3:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .section {
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        input[type="checkbox"]:checked {
+            animation: checkPulse 0.3s ease;
+        }
+
+        @keyframes checkPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* 录音录像按钮组 */
+        .recording-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .recording-controls button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recording-controls button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .recording-controls button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .recording-controls button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 122, 255, 0.3);
+        }
+
+        .recording-controls button:active {
+            transform: translateY(-1px);
+        }
+
+        /* 服务项目样式 */
+        .service-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background: var(--light-gray);
+            border-radius: 12px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .service-item:hover::before {
+            left: 100%;
+        }
+
+        .service-item:hover {
+            background: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
+        }
+
+        .service-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::after {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 122, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px) scale(1);
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        /* 总费用显示 */
+        .total {
+            text-align: right;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--light-gray), white);
+            border-radius: 16px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .total-with-discount {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .total-discounted {
+            color: var(--success-color);
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* 账单详情 */
+        .bill {
+            margin-top: 50px;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px;
+            background: var(--light-gray);
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+
+        .bill-header:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .bill-header h2 {
+            margin: 0;
+            border: none;
+            animation: none;
+        }
+
+        .bill-item {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--light-gray);
+            border-radius: 12px;
+            transition: var(--transition);
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .bill-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .bill-service {
+            margin-left: 20px;
+            margin-top: 15px;
+        }
+
+        .bill-service p {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .bill-service p:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* 价格编辑样式 */
+        .price-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .price-item:hover {
+            background: var(--light-gray);
+            transform: translateX(5px);
+        }
+
+        .editable-price {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .editable-price:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .editable-price::after {
+            content: '✏️';
+            position: absolute;
+            right: -20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .editable-price:hover::after {
+            opacity: 1;
+        }
+
+        .price-edit-container {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .price-edit-input {
+            width: 100px;
+            padding: 6px 10px;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .price-edit-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .price-edit-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .discounted-price {
+            color: var(--success-color);
+            font-weight: bold;
+            margin-left: 10px;
+            animation: highlight 0.5s ease;
+        }
+
+        @keyframes highlight {
+            0% { background: yellow; }
+            100% { background: transparent; }
+        }
+
+        .strikethrough {
+            text-decoration: line-through;
+            color: var(--gray);
+            opacity: 0.6;
+        }
+
+        /* 二维码样式 */
+        .qrcode-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .qrcode-button {
+            padding: 12px 30px;
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .qrcode-button:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
+        }
+
+        .qrcode-button.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: transparent;
+        }
+
+        .qrcode-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .qrcode-container > div {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .qrcode-container > div:not(.hidden) {
+            animation: zoomIn 0.5s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .qrcode-container img {
+            width: 180px;
+            height: 180px;
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+
+        .qrcode-container > div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .qrcode-container > div:hover img {
+            transform: scale(1.05);
+        }
+
+        .qrcode-container p {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        /* 其他样式 */
+        .hidden {
+            display: none !important;
+        }
+
+        .input-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 20px;
+        }
+
+        .input-inline input {
+            width: 100px;
+            margin-bottom: 0;
+        }
+
+        .input-inline label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+
+        .note {
+            font-size: 14px;
+            color: var(--gray);
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+        }
+
+        .table td {
+            background: white;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .table tr:hover td {
+            background: var(--light-gray);
+            transform: scale(1.02);
+        }
+
+        .fengshui {
+            margin-top: 30px;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.4rem;
+            color: var(--danger-color);
+            background: linear-gradient(135deg, #FFE5E5, #FFF0F0);
+            border-radius: 16px;
+            font-weight: 600;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 59, 48, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 59, 48, 0.5); }
+        }
+
+        .service-header {
+            cursor: pointer;
+            position: relative;
+            padding-right: 30px;
+        }
+
+        .service-header::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .service-header.expanded::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .service-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .service-content.show {
+            max-height: 1000px;
+        }
+
+        .subtotal {
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 10px 15px;
+            text-align: right;
+            color: var(--success-color);
+            background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+            border-radius: 8px;
+            animation: slideInRight 0.5s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--light-gray);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .recording-controls {
+                flex-direction: column;
+            }
+
+            .recording-controls button {
+                width: 100%;
+            }
+
+            .qrcode-container {
+                flex-direction: column;
+            }
+
+            .input-inline {
+                display: block;
+                margin-bottom: 10px;
+            }
+
+            .input-inline input {
+                width: 100%;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+
+            .btn, .recording-controls {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景装饰元素 -->
+    <div class="bg-decoration"></div>
+    <div class="bg-decoration"></div>
+
+    <div class="container">
+        <h1>汇爱服务费用计算</h1>
+        
+        <div class="recording-controls">
+            <button onclick="startRecording('audio')">🎤 开始录音</button>
+            <button onclick="stopRecording('audio')">⏹ 停止录音</button>
+            <button onclick="startRecording('video')">📹 开始录像</button>
+            <button onclick="stopRecording('video')">⏹ 停止录像</button>
+        </div>
+
+        <div class="section">
+            <h2>逝者及家属信息</h2>
+            <label>逝者姓名：</label>
+            <input type="text" id="deceasedName" required placeholder="请输入逝者姓名">
+
+            <label>身份证号：</label>
+            <input type="text" id="idNumber" maxlength="18" required placeholder="请输入18位身份证号">
+
+            <label>年龄：</label>
+            <input type="number" id="age" min="0" placeholder="自动计算或手动输入">
+
+            <label>性别：</label>
+            <input type="text" id="gender" readonly placeholder="自动识别">
+
+            <label>家庭住址：</label>
+            <input type="text" id="address" required placeholder="请输入详细地址">
+
+            <label>家属电话：</label>
+            <input type="text" id="familyPhone" required placeholder="请输入联系电话">
+            <p id="phoneLocation" class="note"></p>
+
+            <label>停放时间：</label>
+            <input type="datetime-local" id="storageTime" required>
+
+            <label>来源：</label>
+            <select id="source">
+                <option value="公路">公路</option>
+                <option value="急救">急救</option>
+                <option value="病房">病房</option>
+                <option value="其他">其他</option>
+            </select>
+
+            <div id="sourceMemo">
+                <label>备忘信息：</label>
+                <input type="text" id="sourceMemoInput" placeholder="请输入备忘信息">
+            </div>
+        </div>
+
+        <div class="section services">
+            <h2>汇爱基础服务（必选服务）</h2>
+
+            <h3>1. 接尸服务</h3>
+            <div>
+                <div class="service-item">
+                    <label>接运车费：</label>
+                    <select id="transportFee" class="service-select" data-category="接尸服务">
+                        <option value="">请选择</option>
+                        <option value="600" data-name="市内接运">市内接运：600元/次</option>
+                        <option value="1000" data-name="下乡接运">下乡接运：1000元/次</option>
+                        <option value="2000" data-name="汇爱市内接运">汇爱市内接运：2000元/次</option>
+                        <option value="3000" data-name="汇爱下乡接运">汇爱下乡接运：3000元/次</option>
+                    </select>
+                </div>
+                <div class="service-item">
+                    <label><input type="checkbox" class="service" data-category="接尸服务" data-name="尸体袋" data-price="260"> 尸体袋：260元/个</label>
+                </div>
+                <div class="service-item">
+                    <label>接尸服务费：</label>
+                    <select id="corpseServiceFee" class="service-select" data-category="接尸服务">
+                        <option value="400" data-name="多位师傅" selected>多位师傅：400元/次</option>
+                        <option value="260" data-name="一位师傅">一位师傅：260元/次</option>
+                    </select>
+                </div>
+                <div class="service-item">
+                    <label>上楼搬抬费：</label>
+                    <select id="upstairsFee" class="service-select" data-category="接尸服务">
+                        <option value="0" data-name="无">无</option>
+                        <option value="0" data-name="有担架电梯">有担架电梯：免费</option>
+                        <option value="100" data-name="步梯">步梯：100元/层</option>
+                    </select>
+                    <div id="stairsInput" class="hidden">
+                        <label>请输入楼层数：</label>
+                        <input type="number" id="stairsFloors" min="1" placeholder="输入楼层数">
+                    </div>
+                </div>
+                <div class="service-item">
+                    <label><input type="checkbox" id="over20Hours" data-category="接尸服务" data-name="死亡时间超过20小时" data-price="300"> 死亡时间超过20小时：加收300元</label>
+                </div>
+                <div class="service-item">
+                    <label><input type="checkbox" id="decomposition" data-category="接尸服务" data-name="腐烂情况" data-price="600"> 腐烂情况加收：600元</label>
+                </div>
+            </div>
+
+            <h3>2. 停放与保存服务</h3>
+            <div>
+                <div class="service-item">
+                    <label>冷冻停保费：<span class="note">380元/天（不满1天以100元/小时计，380元封顶）</span></label>
+                    <div class="input-inline">
+                        <input type="number" id="freezingDays" min="0" placeholder="天数">
+                        <label>天</label>
+                    </div>
+                    <div class="input-inline">
+                        <input type="number" id="freezingHours" min="0" max="24" placeholder="小时数">
+                        <label>小时</label>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <label><input type="checkbox" class="service" data-category="停放与保存服务" data-name="环境消毒费" data-price="100" checked disabled> 环境消毒费：100元（必选，仅计一次）</label>
+                </div>
+                <div class="service-item">
+                    <label><input type="checkbox" class="service" data-category="停放与保存服务" data-name="环境卫生费" data-price="100" checked disabled> 环境卫生费：100元（必选，仅计一次）</label>
+                </div>
+                <div class="service-item">
+                    <label>太空被：<span class="note">用于辅助制冷及需要拍摄CT者</span></label>
+                    <select id="spaceQuilt" class="service-select" data-category="停放与保存服务">
+                        <option value="200" data-name="太空被（200元/套）" selected>200元/套</option>
+                        <option value="100" data-name="太空被（100元/条）">100元/条</option>
+                    </select>
+                    <div id="quiltQuantity" class="hidden">
+                        <label>请输入条数：</label>
+                        <input type="number" id="quiltCount" min="0" value="1" placeholder="输入条数">
+                    </div>
+                </div>
+            </div>
+
+            <h3>3. 辅助服务</h3>
+            <div>
+                <div class="service-item">
+                    <label><input type="checkbox" class="service" data-category="辅助服务" data-name="尸体检验床使用费" data-price="200"> 尸体检验床使用费：200元</label>
+                </div>
+                <div class="service-item">
+                    <label><input type="checkbox" class="service" data-category="辅助服务" data-name="料理费" data-price="200"> 料理费（协助抬尸、清洗、处理等）：200元/次</label>
+                </div>
+                <div class="service-item">
+                    <label><input type="checkbox" class="service" data-category="辅助服务" data-name="CT服务费" data-price="300"> CT服务费（仅包括CT预约及抬尸协助，会诊，不包含CT费）：300元/次</label>
+                </div>
+            </div>
+
+            <h3 class="service-header">4. 值守服务</h3>
+            <div class="service-content">
+                <div class="service-item">
+                    <label>值守时间：</label>
+                    <div class="input-inline">
+                        <input type="number" id="dayGuardHours" min="0" placeholder="白天小时数">
+                        <label>白天（30元/小时）</label>
+                    </div>
+                    <div class="input-inline">
+                        <input type="number" id="nightGuardHours" min="0" placeholder="夜间小时数">
+                        <label>夜间（50元/小时）</label>
+                    </div>
+                    <p class="note">每天2小时内：免费</p>
+                </div>
+            </div>
+
+            <h3>5. 回家服务</h3>
+            <div>
+                <div class="service-item">
+                    <label>单程公里数：</label>
+                    <input type="number" id="homeDistance" min="0" placeholder="输入公里数">
+                    <table class="table">
+                        <tr>
+                            <th>里程（公里）</th>
+                            <th>价格（元）</th>
+                        </tr>
+                        <tr>
+                            <td>10公里内</td>
+                            <td>600</td>
+                        </tr>
+                        <tr>
+                            <td>20公里内</td>
+                            <td>700</td>
+                        </tr>
+                        <tr>
+                            <td>30公里内</td>
+                            <td>800</td>
+                        </tr>
+                        <tr>
+                            <td>40公里内</td>
+                            <td>1000</td>
+                        </tr>
+                        <tr>
+                            <td>50公里内</td>
+                            <td>1200</td>
+                        </tr>
+                        <tr>
+                            <td>50-200公里</td>
+                            <td>12元/公里（双程）</td>
+                        </tr>
+                        <tr>
+                            <td>200公里以上</td>
+                            <td>10元/公里（双程）</td>
+                        </tr>
+                    </table>
+                    <p class="note">超过70公里的加收按单程每公里0.5元的路桥费</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section services">
+            <h2>汇爱关怀服务（可选服务）</h2>
+
+            <h3>1. 缝合服务</h3>
+            <div>
+                <div class="service-item">
+                    <label>基础缝合：<span class="note">340元 + 160元/厘米，价格10000元封顶</span></label>
+                    <div class="input-inline">
+                        <input type="number" id="sutureLength" min="0" placeholder="厘米数">
+                        <label>厘米</label>
+                    </div>
+                    <label><input type="checkbox" id="filling"> 需填充</label>
+                    <label><input type="checkbox" id="skullImplant"> 颅骨植入</label>
+                </div>
+            </div>
+
+            <h3>2. 整洁穿衣化妆服务</h3>
+            <div>
+                <div class="service-item">
+                    <label>请选择服务类型：</label>
+                    <select id="makeupService">
+                        <option value="">请选择</option>
+                        <option value="套餐1">全部服务及公共用品：2860元</option>
+                        <option value="套餐2">全部服务及一次性化妆品：3560元</option>
+                        <option value="套餐3">全部服务及全新工具和全新高档化妆品：3960元</option>
+                        <option value="单选服务">单选服务</option>
+                    </select>
+                    <p class="note">套餐包含：洗发或修发、清洁口鼻耳、剪指甲、修鼻毛或刮胡子、沐浴露洗澡、擦干、两位师父轻柔穿衣、化妆</p>
+                </div>
+                <div id="singleServices" class="hidden">
+                    <div class="service-item">
+                        <label><input type="checkbox" data-category="整洁穿衣化妆服务" data-name="穿衣检验床使用费" data-price="100"> 穿衣检验床使用费：100元</label>
+                    </div>
+                    <div class="service-item">
+                        <label><input type="checkbox" data-category="整洁穿衣化妆服务" data-name="冰棺白布、搬抬白布、毛巾" data-price="100"> 冰棺白布、搬抬白布、毛巾（10-20条）：100元</label>
+                    </div>
+                    <div class="service-item">
+                        <label><input type="checkbox" data-category="整洁穿衣化妆服务" data-name="洗发或修发" data-price="200"> 洗发或修发：200元</label>
+                    </div>
+                    <div class="service-item">
+                        <label><input type="checkbox" data-category="整洁穿衣化妆服务" data-name="清洁并封闭口鼻耳、修剪毛发等" data-price="300"> 清洁并封闭口鼻耳、修剪毛发等：300元</label>
+                    </div>
+                    <div class="service-item">
+                        <label><input type="checkbox" data-category="整洁穿衣化妆服务" data-name="沐浴露洗澡" data-price="300"> 沐浴露洗澡：300元</label>
+                    </div>
+                    <div class="service-item">
+                        <label>擦干穿衣：</label>
+                        <select id="dressingService" class="service-select" data-category="整洁穿衣化妆服务">
+                            <option value="">请选择</option>
+                            <option value="800" data-name="一位师傅">一位师傅：800元</option>
+                            <option value="1500" data-name="多位师傅或女师傅">多位师傅或女师傅：1500元</option>
+                        </select>
+                    </div>
+                    <div class="service-item">
+                        <label>化妆服务：</label>
+                        <select id="makeupOption" class="service-select" data-category="整洁穿衣化妆服务">
+                            <option value="">请选择</option>
+                            <option value="600" data-name="化妆服务（公共用品）">公共用品：600元</option>
+                            <option value="1200" data-name="化妆服务（高档化妆品）">高档化妆品：1200元</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <h3>3. 额外用品金额</h3>
+            <div>
+                <div class="service-item">
+                    <label>请输入金额：</label>
+                    <input type="number" id="additionalAmount" min="0" placeholder="输入金额">
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn" onclick="calculateTotal()">💰 计算总费用</button>
+            <button class="btn" onclick="showFengshui()">🔮 低保家庭</button>
+        </div>
+
+        <div class="total" id="totalAmount">
+            <div class="total-with-discount">
+                <span id="originalTotal">总费用：0元</span>
+                <span id="discountedTotal" class="total-discounted hidden"></span>
+            </div>
+        </div>
+        <div class="fengshui hidden" id="fengshuiPrice"></div>
+
+        <div class="bill" id="billDetails" style="display:none;">
+            <div class="bill-header" onclick="toggleBillDetails()">
+                <h2>特殊逝者费用清单</h2>
+                <span class="edit-mode-info">点击金额可编辑</span>
+            </div>
+            <div id="billContent"></div>
+            <div class="qrcode-buttons">
+                <button class="qrcode-button active" onclick="showQRCode('unionpay')">银联</button>
+                <button class="qrcode-button" onclick="showQRCode('wechat')">微信</button>
+                <button class="qrcode-button" onclick="showQRCode('alipay')">支付宝</button>
+            </div>
+            <div class="qrcode-container">
+                <div id="qrcode-unionpay">
+                    <img src="qrcode_unionpay.jpg" alt="银联收款码">
+                    <p>银联收款码</p>
+                </div>
+                <div id="qrcode-wechat" class="hidden">
+                    <img src="qrcode_wechat.jpg" alt="微信收款码">
+                    <p>微信收款码</p>
+                </div>
+                <div id="qrcode-alipay" class="hidden">
+                    <img src="qrcode_alipay.jpg" alt="支付宝收款码">
+                    <p>支付宝收款码</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let chunks = [];
+        let recordingType;
+        let calculatedTotal = 0;
+        let originalTotal = 0;
+        let editedPrices = {};
+        let billData = {};
+
+        // 页面加载动画
+        window.addEventListener('load', function() {
+            document.querySelectorAll('.section').forEach((section, index) => {
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                }, index * 100);
+            });
+        });
+
+        // 平滑滚动
+        function smoothScroll(target) {
+            const element = typeof target === 'string' ? document.querySelector(target) : target;
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        function startRecording(mode) {
+            recordingType = mode;
+            const constraints = mode === 'audio' ? { audio: true } : { audio: true, video: true };
+            
+            // 添加动画效果
+            const button = event.target;
+            button.style.animation = 'pulse 1s infinite';
+            
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    chunks = [];
+                    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: mode === 'audio' ? 'audio/webm' : 'video/webm' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = mode + '_' + new Date().toISOString() + '.webm';
+                        a.click();
+                    };
+                })
+                .catch(error => {
+                    console.error('Error starting recording:', error);
+                    alert('无法启动录制，请检查设备权限');
+                });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                // 停止动画
+                document.querySelectorAll('.recording-controls button').forEach(btn => {
+                    btn.style.animation = '';
+                });
+            }
+        }
+
+        // 自动生成年龄和性别
+        document.getElementById('idNumber').addEventListener('input', function() {
+            var id = this.value;
+            var gender = '';
+
+            if (id.length === 15 || id.length === 18) {
+                // 获取性别
+                var genderDigit = id.length === 18 ? id.charAt(16) : id.charAt(14);
+                gender = parseInt(genderDigit) % 2 === 1 ? '男' : '女';
+                document.getElementById('gender').value = gender;
+
+                // 获取出生日期并计算年龄
+                var birthYear = id.length === 18 ? id.substr(6, 4) : '19' + id.substr(6, 2);
+                var birthMonth = id.length === 18 ? id.substr(10, 2) : id.substr(8, 2);
+                var birthDay = id.length === 18 ? id.substr(12, 2) : id.substr(10, 2);
+                var birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+                var today = new Date();
+                var age = today.getFullYear() - birthDate.getFullYear();
+                var monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                // 仅在年龄字段为空或未被手动修改时更新
+                if (!document.getElementById('age').dataset.manuallyChanged) {
+                    document.getElementById('age').value = age;
+                }
+            }
+        });
+
+        // 标记年龄字段是否被手动修改
+        document.getElementById('age').addEventListener('input', function() {
+            this.dataset.manuallyChanged = true;
+        });
+
+        // 根据家属电话获取归属地
+        document.getElementById('familyPhone').addEventListener('blur', function() {
+            var phone = this.value;
+            if (phone.length >= 7) {
+                // 这里可以调用实际的API
+                document.getElementById('phoneLocation').innerText = '归属地：查询中...';
+                setTimeout(() => {
+                    document.getElementById('phoneLocation').innerText = '归属地：中国大陆';
+                }, 1000);
+            }
+        });
+
+        // 上楼搬抬费显示楼层输入
+        document.getElementById('upstairsFee').addEventListener('change', function() {
+            if (this.value === '100') {
+                document.getElementById('stairsInput').classList.remove('hidden');
+            } else {
+                document.getElementById('stairsInput').classList.add('hidden');
+            }
+        });
+
+        // 太空被数量输入
+        document.getElementById('spaceQuilt').addEventListener('change', function() {
+            if (this.value === '100') {
+                document.getElementById('quiltQuantity').classList.remove('hidden');
+            } else {
+                document.getElementById('quiltQuantity').classList.add('hidden');
+            }
+        });
+
+        // 化妆服务选择
+        document.getElementById('makeupService').addEventListener('change', function() {
+            if (this.value === '单选服务') {
+                document.getElementById('singleServices').classList.remove('hidden');
+            } else {
+                document.getElementById('singleServices').classList.add('hidden');
+            }
+        });
+
+        // 服务标题点击展开内容（改进版）
+        document.querySelectorAll('.service-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var content = this.nextElementSibling;
+                this.classList.toggle('expanded');
+                content.classList.toggle('show');
+            });
+        });
+
+        // 自动计算冷冻停保费时间
+        document.getElementById('storageTime').addEventListener('change', function() {
+            var storageTime = new Date(this.value);
+            var now = new Date();
+            var diff = now - storageTime;
+            if (diff > 0) {
+                var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                var hours = Math.ceil((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                document.getElementById('freezingDays').value = days;
+                document.getElementById('freezingHours').value = hours;
+            }
+        });
+
+        // 显示指定二维码
+        function showQRCode(type) {
+            document.getElementById('qrcode-unionpay').classList.add('hidden');
+            document.getElementById('qrcode-wechat').classList.add('hidden');
+            document.getElementById('qrcode-alipay').classList.add('hidden');
+            document.getElementById('qrcode-' + type).classList.remove('hidden');
+
+            document.querySelectorAll('.qrcode-button').forEach(function(button) {
+                button.classList.remove('active');
+            });
+            document.querySelector('.qrcode-button[onclick="showQRCode(\'' + type + '\')"]').classList.add('active');
+        }
+
+        // 切换费用清单显示/隐藏
+        function toggleBillDetails() {
+            var billContent = document.getElementById('billContent');
+            if (billContent.style.display === 'none') {
+                billContent.style.display = 'block';
+                billContent.style.animation = 'fadeInUp 0.5s ease';
+            } else {
+                billContent.style.display = 'none';
+            }
+        }
+
+        // 计算总费用
+        function calculateTotal() {
+            calculatedTotal = 0;
+            billData = {};
+
+            // 接尸服务费选择
+            var transportFee = document.getElementById('transportFee');
+            if (transportFee.value) {
+                var price = parseFloat(transportFee.value);
+                var name = transportFee.options[transportFee.selectedIndex].getAttribute('data-name');
+                if (!billData['接尸服务']) {
+                    billData['接尸服务'] = [];
+                }
+                billData['接尸服务'].push({name: '接运车费 - ' + name, price: price});
+                calculatedTotal += price;
+            }
+
+            // 其他接尸服务
+            var services = document.querySelectorAll('.service:checked:not(:disabled)');
+            services.forEach(function(service) {
+                var price = parseFloat(service.getAttribute('data-price'));
+                var category = service.getAttribute('data-category');
+                var name = service.getAttribute('data-name');
+                if (!billData[category]) {
+                    billData[category] = [];
+                }
+                billData[category].push({name: name, price: price});
+                calculatedTotal += price;
+            });
+
+            // 接尸服务费默认多位师傅
+            var corpseServiceFee = document.getElementById('corpseServiceFee');
+            if (corpseServiceFee.value) {
+                var price = parseFloat(corpseServiceFee.value);
+                var name = corpseServiceFee.options[corpseServiceFee.selectedIndex].getAttribute('data-name');
+                if (!billData['接尸服务']) {
+                    billData['接尸服务'] = [];
+                }
+                billData['接尸服务'].push({name: '接尸服务费 - ' + name, price: price});
+                calculatedTotal += price;
+            }
+
+            // 上楼搬抬费
+            var upstairsFee = document.getElementById('upstairsFee');
+            if (upstairsFee.value === '100') {
+                var floors = parseInt(document.getElementById('stairsFloors').value) || 0;
+                var price = floors * 100;
+                if (!billData['接尸服务']) {
+                    billData['接尸服务'] = [];
+                }
+                billData['接尸服务'].push({name: '上楼搬抬费（步梯 ' + floors + ' 层）', price: price});
+                calculatedTotal += price;
+            } else if (upstairsFee.value === '0' && upstairsFee.options[upstairsFee.selectedIndex].getAttribute('data-name') === '有担架电梯') {
+                if (!billData['接尸服务']) {
+                    billData['接尸服务'] = [];
+                }
+                billData['接尸服务'].push({name: '上楼搬抬费（有担架电梯）', price: 0});
+            }
+
+            // 死亡时间超过20小时
+            if (document.getElementById('over20Hours').checked) {
+                var price = parseFloat(document.getElementById('over20Hours').getAttribute('data-price'));
+                if (!billData['接尸服务']) {
+                    billData['接尸服务'] = [];
+                }
+                billData['接尸服务'].push({name: '死亡时间超过20小时', price: price});
+                calculatedTotal += price;
+            }
+
+            // 腐烂情况加收
+            if (document.getElementById('decomposition').checked) {
+                var price = parseFloat(document.getElementById('decomposition').getAttribute('data-price'));
+                if (!billData['接尸服务']) {
+                    billData['接尸服务'] = [];
+                }
+                billData['接尸服务'].push({name: '腐烂情况加收', price: price});
+                calculatedTotal += price;
+            }
+
+            // 冷冻停保费
+            var freezingDays = parseFloat(document.getElementById('freezingDays').value) || 0;
+            var freezingHours = parseFloat(document.getElementById('freezingHours').value) || 0;
+            var freezingFee = 0;
+
+            if (freezingDays > 0) {
+                freezingFee += freezingDays * 380;
+            }
+
+            if (freezingHours > 0) {
+                var hourlyFee = freezingHours * 100;
+                hourlyFee = hourlyFee > 380 ? 380 : hourlyFee;
+                freezingFee += hourlyFee;
+            }
+
+            if (freezingFee > 0) {
+                if (!billData['停放与保存服务']) {
+                    billData['停放与保存服务'] = [];
+                }
+                billData['停放与保存服务'].push({name: '冷冻停保费', price: freezingFee});
+                calculatedTotal += freezingFee;
+            }
+
+            // 必选的环境消毒费和环境卫生费
+            var mandatoryServices = document.querySelectorAll('.service:checked:disabled');
+            mandatoryServices.forEach(function(service) {
+                var price = parseFloat(service.getAttribute('data-price'));
+                var category = service.getAttribute('data-category');
+                var name = service.getAttribute('data-name');
+                if (!billData[category]) {
+                    billData[category] = [];
+                }
+                billData[category].push({name: name, price: price});
+                calculatedTotal += price;
+            });
+
+            // 太空被
+            var spaceQuilt = document.getElementById('spaceQuilt');
+            if (spaceQuilt.value) {
+                var price = parseFloat(spaceQuilt.value);
+                var name = spaceQuilt.options[spaceQuilt.selectedIndex].getAttribute('data-name');
+                if (spaceQuilt.value === '100') {
+                    var count = parseInt(document.getElementById('quiltCount').value) || 0;
+                    price *= count;
+                    name += ' x ' + count + '条';
+                }
+                if (!billData['停放与保存服务']) {
+                    billData['停放与保存服务'] = [];
+                }
+                billData['停放与保存服务'].push({name: name, price: price});
+                calculatedTotal += price;
+            } else {
+                var price = 200;
+                var name = '太空被（200元/套）';
+                if (!billData['停放与保存服务']) {
+                    billData['停放与保存服务'] = [];
+                }
+                billData['停放与保存服务'].push({name: name, price: price});
+                calculatedTotal += price;
+            }
+
+            // 值守服务
+            var dayGuardHours = parseFloat(document.getElementById('dayGuardHours').value) || 0;
+            var nightGuardHours = parseFloat(document.getElementById('nightGuardHours').value) || 0;
+            var guardFee = 0;
+
+            var totalGuardHours = dayGuardHours + nightGuardHours;
+            if (totalGuardHours > 2) {
+                var dayFee = dayGuardHours * 30;
+                var nightFee = nightGuardHours * 50;
+                guardFee = dayFee + nightFee;
+                if (!billData['值守服务']) {
+                    billData['值守服务'] = [];
+                }
+                if (dayGuardHours > 0) {
+                    billData['值守服务'].push({name: '白天值守 ' + dayGuardHours + ' 小时', price: dayFee});
+                }
+                if (nightGuardHours > 0) {
+                    billData['值守服务'].push({name: '夜间值守 ' + nightGuardHours + ' 小时', price: nightFee});
+                }
+                calculatedTotal += guardFee;
+            }
+
+            // 回家服务
+            var homeDistance = parseFloat(document.getElementById('homeDistance').value) || 0;
+            var homeFee = 0;
+            var roadFee = 0;
+            var homeName = '';
+            if (homeDistance > 0) {
+                if (homeDistance <= 10) {
+                    homeFee = 600;
+                    homeName = '回家服务（10公里内）';
+                } else if (homeDistance <= 20) {
+                    homeFee = 700;
+                    homeName = '回家服务（20公里内）';
+                } else if (homeDistance <= 30) {
+                    homeFee = 800;
+                    homeName = '回家服务（30公里内）';
+                } else if (homeDistance <= 40) {
+                    homeFee = 1000;
+                    homeName = '回家服务（40公里内）';
+                } else if (homeDistance <= 50) {
+                    homeFee = 1200;
+                    homeName = '回家服务（50公里内）';
+                } else if (homeDistance <= 200) {
+                    homeFee = homeDistance * 2 * 12;
+                    homeName = '回家服务（' + homeDistance + '公里，50-200公里）';
+                } else {
+                    homeFee = homeDistance * 2 * 10;
+                    homeName = '回家服务（' + homeDistance + '公里，200公里以上）';
+                }
+                if (homeDistance > 70) {
+                    roadFee = homeDistance * 0.5;
+                    homeName += '，路桥费：' + roadFee.toFixed(2) + '元';
+                }
+                if (!billData['回家服务']) {
+                    billData['回家服务'] = [];
+                }
+                billData['回家服务'].push({name: homeName, price: homeFee + roadFee});
+                calculatedTotal += homeFee + roadFee;
+            }
+
+            // 缝合服务
+            var sutureLength = parseFloat(document.getElementById('sutureLength').value) || 0;
+            var sutureFee = 0;
+            var sutureMultiplier = 1;
+            if (document.getElementById('filling').checked || document.getElementById('skullImplant').checked) {
+                sutureMultiplier = 2;
+            }
+            if (sutureLength > 0) {
+                sutureFee = (340 + 160 * sutureLength) * sutureMultiplier;
+                sutureFee = sutureFee > 10000 ? 10000 : sutureFee;
+                var sutureName = '缝合服务';
+                if (document.getElementById('filling').checked) {
+                    sutureName += '（需填充）';
+                }
+                if (document.getElementById('skullImplant').checked) {
+                    sutureName += '（颅骨植入）';
+                }
+                if (!billData['缝合服务']) {
+                    billData['缝合服务'] = [];
+                }
+                billData['缝合服务'].push({name: sutureName, price: sutureFee});
+                calculatedTotal += sutureFee;
+            }
+
+            // 整洁穿衣化妆服务
+            var makeupService = document.getElementById('makeupService').value;
+            if (makeupService) {
+                if (makeupService.startsWith('套餐')) {
+                    var price = 0;
+                    var name = '';
+                    if (makeupService === '套餐1') {
+                        price = 2860;
+                        name = '整洁穿衣化妆服务 - 套餐1';
+                    } else if (makeupService === '套餐2') {
+                        price = 3560;
+                        name = '整洁穿衣化妆服务 - 套餐2';
+                    } else if (makeupService === '套餐3') {
+                        price = 3960;
+                        name = '整洁穿衣化妆服务 - 套餐3';
+                    }
+                    if (!billData['整洁穿衣化妆服务']) {
+                        billData['整洁穿衣化妆服务'] = [];
+                    }
+                    billData['整洁穿衣化妆服务'].push({name: name, price: price});
+                    calculatedTotal += price;
+                } else if (makeupService === '单选服务') {
+                    var singleServices = document.querySelectorAll('#singleServices input[type="checkbox"]:checked');
+                    singleServices.forEach(function(service) {
+                        var price = parseFloat(service.getAttribute('data-price'));
+                        var category = service.getAttribute('data-category');
+                        var name = service.getAttribute('data-name');
+                        if (!billData[category]) {
+                            billData[category] = [];
+                        }
+                        billData[category].push({name: name, price: price});
+                        calculatedTotal += price;
+                    });
+
+                    var dressingService = document.getElementById('dressingService');
+                    if (dressingService.value) {
+                        var price = parseFloat(dressingService.value);
+                        var name = dressingService.options[dressingService.selectedIndex].getAttribute('data-name');
+                        if (!billData['整洁穿衣化妆服务']) {
+                            billData['整洁穿衣化妆服务'] = [];
+                        }
+                        billData['整洁穿衣化妆服务'].push({name: '擦干穿衣 - ' + name, price: price});
+                        calculatedTotal += price;
+                    }
+
+                    var makeupOption = document.getElementById('makeupOption');
+                    if (makeupOption.value) {
+                        var price = parseFloat(makeupOption.value);
+                        var name = makeupOption.options[makeupOption.selectedIndex].getAttribute('data-name');
+                        if (!billData['整洁穿衣化妆服务']) {
+                            billData['整洁穿衣化妆服务'] = [];
+                        }
+                        billData['整洁穿衣化妆服务'].push({name: name, price: price});
+                        calculatedTotal += price;
+                    }
+                }
+            }
+
+            // 额外用品金额
+            var additionalAmount = parseFloat(document.getElementById('additionalAmount').value) || 0;
+            if (additionalAmount > 0) {
+                if (!billData['额外用品金额']) {
+                    billData['额外用品金额'] = [];
+                }
+                billData['额外用品金额'].push({name: '额外用品金额', price: additionalAmount});
+                calculatedTotal += additionalAmount;
+            }
+
+            // 保存原始总费用
+            originalTotal = calculatedTotal;
+            
+            // 显示总费用
+            updateTotalDisplay();
+            
+            // 隐藏风水价
+            document.getElementById('fengshuiPrice').classList.add('hidden');
+
+            // 显示费用清单
+            var billDetails = document.getElementById('billDetails');
+            billDetails.style.display = 'block';
+            renderBillContent();
+
+            // 默认显示银联二维码
+            showQRCode('unionpay');
+
+            // 平滑滚动到账单
+            smoothScroll('#billDetails');
+        }
+        
+        // 渲染账单内容
+        function renderBillContent() {
+            var billContent = document.getElementById('billContent');
+            billContent.innerHTML = '';
+            billContent.style.display = 'block';
+
+            for (var category in billData) {
+                var categoryDiv = document.createElement('div');
+                categoryDiv.className = 'bill-item';
+                var categoryTitle = document.createElement('h3');
+                categoryTitle.innerText = category;
+                categoryDiv.appendChild(categoryTitle);
+
+                var servicesDiv = document.createElement('div');
+                servicesDiv.className = 'bill-service';
+
+                var categorySum = 0;
+                billData[category].forEach(function(item, index) {
+                    // 生成唯一标识符
+                    var itemId = category + '_' + index;
+                    
+                    // 检查是否有编辑后的价格
+                    var finalPrice = editedPrices[itemId] !== undefined ? editedPrices[itemId] : item.price;
+                    
+                    var serviceP = document.createElement('div');
+                    serviceP.className = 'price-item';
+                    
+                    // 创建价格显示区域
+                    var priceDisplay = document.createElement('span');
+                    priceDisplay.className = 'original-price';
+                    
+                    if (editedPrices[itemId] !== undefined) {
+                        // 如果有编辑后的价格，显示划掉的原价和编辑后的价格
+                        priceDisplay.innerHTML = item.name + '：<span class="strikethrough">' + 
+                            (Math.round(item.price) === item.price ? item.price : item.price.toFixed(2)) + 
+                            '元</span> <span class="discounted-price editable-price" onclick="showPriceEditInput(\'' + itemId + '\', \'' + item.name + '\', ' + item.price + ', ' + finalPrice + ', this.parentNode.parentNode)">' + 
+                            (Math.round(finalPrice) === finalPrice ? finalPrice : finalPrice.toFixed(2)) + '元</span>';
+                    } else {
+                        // 如果没有编辑，显示原价
+                        priceDisplay.innerHTML = item.name + '：<span class="editable-price" onclick="showPriceEditInput(\'' + itemId + '\', \'' + item.name + '\', ' + item.price + ', ' + item.price + ', this.parentNode.parentNode)">' + 
+                            (Math.round(item.price) === item.price ? item.price : item.price.toFixed(2)) + '元</span>';
+                    }
+                    
+                    serviceP.appendChild(priceDisplay);
+                    
+                    servicesDiv.appendChild(serviceP);
+                    categorySum += finalPrice;
+                });
+
+                var subtotalP = document.createElement('p');
+                subtotalP.className = 'subtotal';
+                subtotalP.innerText = '小计：' + (Math.round(categorySum) === categorySum ? categorySum : categorySum.toFixed(2)) + '元';
+                servicesDiv.appendChild(subtotalP);
+
+                categoryDiv.appendChild(servicesDiv);
+                billContent.appendChild(categoryDiv);
+            }
+        }
+        
+        // 更新总费用显示
+        function updateTotalDisplay() {
+            var discountedTotal = originalTotal;
+            
+            // 计算编辑后的总费用
+            for (var key in editedPrices) {
+                var categoryIndex = key.split('_');
+                var category = categoryIndex[0];
+                var index = parseInt(categoryIndex[1]);
+                
+                // 减去原价，加上编辑后的价格
+                discountedTotal = discountedTotal - billData[category][index].price + editedPrices[key];
+            }
+            
+            // 显示总费用
+            if (Object.keys(editedPrices).length > 0) {
+                document.getElementById('originalTotal').innerHTML = '<span class="strikethrough">总费用：' + 
+                    (Math.round(originalTotal) === originalTotal ? originalTotal : originalTotal.toFixed(2)) + '元</span>';
+                document.getElementById('discountedTotal').innerText = '优惠价：' + 
+                    (Math.round(discountedTotal) === discountedTotal ? discountedTotal : discountedTotal.toFixed(2)) + '元';
+                document.getElementById('discountedTotal').classList.remove('hidden');
+            } else {
+                document.getElementById('originalTotal').innerText = '总费用：' + 
+                    (Math.round(originalTotal) === originalTotal ? originalTotal : originalTotal.toFixed(2)) + '元';
+                document.getElementById('discountedTotal').classList.add('hidden');
+            }
+        }
+        
+        // 显示价格编辑输入框
+        function showPriceEditInput(itemId, itemName, originalPrice, currentPrice, parentElement) {
+            // 移除可能已存在的编辑框
+            var existingEdit = document.getElementById('price-edit-' + itemId);
+            if (existingEdit) {
+                existingEdit.remove();
+            }
+            
+            // 创建编辑容器
+            var editContainer = document.createElement('div');
+            editContainer.id = 'price-edit-' + itemId;
+            editContainer.className = 'price-edit-container';
+            
+            // 创建输入框
+            var input = document.createElement('input');
+            input.type = 'number';
+            input.value = currentPrice;
+            input.min = 0;
+            input.step = 0.01;
+            input.className = 'price-edit-input';
+            
+            // 创建确认按钮
+            var confirmBtn = document.createElement('button');
+            confirmBtn.innerHTML = '确认';
+            confirmBtn.className = 'price-edit-btn';
+            confirmBtn.onclick = function() {
+                var newPrice = parseFloat(input.value);
+                if (!isNaN(newPrice) && newPrice >= 0) {
+                    // 保存编辑后的价格
+                    editedPrices[itemId] = newPrice;
+                    
+                    // 更新显示
+                    updatePriceDisplay(itemId, itemName, originalPrice, newPrice, parentElement);
+                    
+                    // 重新计算总费用
+                    updateTotalDisplay();
+                    
+                    // 移除编辑框
+                    editContainer.remove();
+                }
+            };
+            
+            // 创建取消按钮
+            var cancelBtn = document.createElement('button');
+            cancelBtn.innerHTML = '取消';
+            cancelBtn.className = 'price-edit-btn';
+            cancelBtn.onclick = function() {
+                editContainer.remove();
+            };
+            
+            // 添加到容器
+            editContainer.appendChild(input);
+            editContainer.appendChild(confirmBtn);
+            editContainer.appendChild(cancelBtn);
+            
+            // 添加到父元素
+            parentElement.appendChild(editContainer);
+            
+            // 聚焦输入框
+            input.focus();
+        }
+        
+        // 更新价格显示
+        function updatePriceDisplay(itemId, itemName, originalPrice, newPrice, parentElement) {
+            // 更新价格显示区域
+            var priceDisplay = parentElement.querySelector('.original-price');
+            
+            if (newPrice !== originalPrice) {
+                priceDisplay.innerHTML = itemName + '：<span class="strikethrough">' + 
+                    (Math.round(originalPrice) === originalPrice ? originalPrice : originalPrice.toFixed(2)) + 
+                    '元</span> <span class="discounted-price editable-price" onclick="showPriceEditInput(\'' + itemId + '\', \'' + itemName + '\', ' + originalPrice + ', ' + newPrice + ', this.parentNode.parentNode)">' + 
+                    (Math.round(newPrice) === newPrice ? newPrice : newPrice.toFixed(2)) + '元</span>';
+            } else {
+                priceDisplay.innerHTML = itemName + '：<span class="editable-price" onclick="showPriceEditInput(\'' + itemId + '\', \'' + itemName + '\', ' + originalPrice + ', ' + originalPrice + ', this.parentNode.parentNode)">' + 
+                    (Math.round(originalPrice) === originalPrice ? originalPrice : originalPrice.toFixed(2)) + '元</span>';
+                
+                // 如果价格恢复原价，从编辑记录中删除
+                delete editedPrices[itemId];
+            }
+            
+            // 重新渲染账单内容以确保所有编辑后的价格都可再次编辑
+            renderBillContent();
+        }
+
+        function showFengshui() {
+            if (calculatedTotal === 0) {
+                alert('请先计算总费用');
+                return;
+            }
+            var fengshuiPrice = calculateFengshuiPrice(calculatedTotal);
+            var fengshuiDiv = document.getElementById('fengshuiPrice');
+            if (fengshuiPrice) {
+                fengshuiDiv.innerText = '风水价：' + fengshuiPrice.price + '元（' + fengshuiPrice.explanation + '）';
+            } else {
+                var reducedPrice = calculatedTotal - 103;
+                fengshuiDiv.innerText = '风水价：' + reducedPrice + '元（五行相生，祝愿逝者转生顺利，吉祥平安）';
+            }
+            fengshuiDiv.classList.remove('hidden');
+            smoothScroll('#fengshuiPrice');
+        }
+
+        // 计算风水价
+        function calculateFengshuiPrice(total) {
+            var min = total - 300 > 0 ? total - 300 : 0;
+            for (var price = total; price >= min; price--) {
+                var priceStr = String(Math.floor(price));
+                if (priceStr.length !== 4) continue;
+                var num1 = parseInt(priceStr.charAt(0));
+                var num2 = parseInt(priceStr.charAt(1));
+                var num3 = parseInt(priceStr.charAt(2));
+                var num4 = parseInt(priceStr.charAt(3));
+                var element1 = getElement(num1);
+                var element2 = getElement(num2);
+                var element3 = getElement(num3);
+                var element4 = getElement(num4);
+                if (element1 && element2 && element3 && element4) {
+                    if (isGenerating(element1, element2) && isGenerating(element2, element3) && isGenerating(element3, element4)) {
+                        var explanation = num1 + element1 + '生' + num2 + element2 + '，' + num2 + element2 + '生' + num3 + element3 + '，' + num3 + element3 + '生' + num4 + element4 + '，五行流转，祝愿逝者转世顺利，幸福安康';
+                        return {price: price, explanation: explanation};
+                    }
+                }
+            }
+            return null;
+        }
+
+        // 获取数字对应的五行
+        function getElement(num) {
+            var elements = {
+                1: '水',
+                6: '水',
+                2: '火',
+                7: '火',
+                3: '木',
+                8: '木',
+                4: '金',
+                9: '金',
+                5: '土',
+                0: '土'
+            };
+            return elements[num];
+        }
+
+        // 判断五行是否相生
+        function isGenerating(element1, element2) {
+            var generating = {
+                '金': '水',
+                '水': '木',
+                '木': '火',
+                '火': '土',
+                '土': '金'
+            };
+            return generating[element1] === element2;
+        }
+
+        // 添加输入框聚焦效果
+        document.querySelectorAll('input, select').forEach(function(element) {
+            element.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            element.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
