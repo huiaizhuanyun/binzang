@@ -561,7 +561,7 @@
         <h3>1. 缝合服务</h3>
         <div>
             <div class="service-item">
-                <label>基础缝合：<span class="note">340元 + 160元/厘米，价格10000元封顶</span></label>
+                <label>基础缝合：<span class="note">500元 + 160元/厘米，价格10000元封顶</span></label>
                 <div class="suture-mode-group">
                     <label class="suture-mode"><input type="radio" name="sutureChargeMode" value="length" checked>按厘米计价</label>
                     <label class="suture-mode"><input type="radio" name="sutureChargeMode" value="amount">按金额输入</label>
@@ -1140,7 +1140,7 @@
             var sutureLength = parseFloat(document.getElementById('sutureLength').value) || 0;
             if (sutureLength > 0) {
                 var sutureMultiplier = (hasFilling || hasSkullImplant) ? 2 : 1;
-                sutureFee = (340 + 160 * sutureLength) * sutureMultiplier;
+                sutureFee = (500 + 160 * sutureLength) * sutureMultiplier;
                 if (sutureFee > 10000) {
                     sutureFee = 10000;
                 }
